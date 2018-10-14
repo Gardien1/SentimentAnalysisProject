@@ -1,6 +1,7 @@
 package com.sentimentanalysis.usq.sentimentanalysis;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -26,21 +27,26 @@ public abstract class UIUpdater {
      * @input2: String - Desired text to update textview.
      *
      * */
-    public static void UpdateMainScanTime(AppCompatActivity context , String text)
+    public static void UpdateMainScanTime(final AppCompatActivity context , final String text)
     {
-        TextView updateText = (TextView) context.findViewById(R.id.last_updated_txt);
+        context.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView updateText = (TextView) context.findViewById(R.id.last_updated_txt);
+                updateText.setTextColor(Color.parseColor("#ffffff"));
 
-        // Ensure element exists.
-        if(updateText != null)
-        {
-            updateText.setText(text);
+                // Ensure element exists.
+                if(updateText != null)
+                {
+                    updateText.setText(text);
 
-            if(updateText.getVisibility() == View.INVISIBLE)
-            {
-                updateText.setVisibility(View.VISIBLE);
+                    if(updateText.getVisibility() == View.INVISIBLE)
+                    {
+                        updateText.setVisibility(View.VISIBLE);
+                    }
+                }
             }
-        }
-
+        });
     }
 
 }

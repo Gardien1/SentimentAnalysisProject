@@ -30,6 +30,7 @@ public class SubjectList {
     private Subject NOBODY = new Subject( "", "" );
     private Lexicon LEXICON;
     private TwitterApi TWITTER_API = new TwitterApi();
+    private ScanHistory scanHistory;
     private ArrayList<Subject> subjects = new ArrayList<Subject>(30);
     private Context applicationContext;
 
@@ -46,10 +47,11 @@ public class SubjectList {
     }
 
 
-    public SubjectList(Context appContext , Lexicon lexiconObj)
+    public SubjectList(Context appContext , Lexicon lexiconObj, ScanHistory history)
     {
         applicationContext = appContext;
         LEXICON = lexiconObj;
+        scanHistory = history;
     }
 
     public void addSubject( String name,  String handle ) {
@@ -124,14 +126,14 @@ public class SubjectList {
         for(int i=0; i < subjects.size() ; i++)
         {
             Log.i("ANALYSE CALL" , subjects.get(i).getTwitterHandle());
-            subjects.get(i).analyseTweets(LEXICON, TWITTER_API );
+            subjects.get(i).analyseTweets(LEXICON, TWITTER_API,scanHistory);
             Log.i("ANALYSE CALL" , subjects.get(i).getTwitterHandle() + " saving tweets");
         }
     }
 
     public void testDailyTrends(Context context, NotificationManager notificationManager ) {
         for ( Subject subject :  subjects ) {
-            subject.testDailyTrend( context, notificationManager );
+            //subject.testDailyTrend( context, notificationManager );
         }
     }
 
@@ -147,5 +149,14 @@ public class SubjectList {
         }
 
         return false;
+    }
+
+    public void emptyList()
+    {
+        subjects.removeAll(subjects);
+    }
+
+    public ScanHistory getScanHistory() {
+        return scanHistory;
     }
 }

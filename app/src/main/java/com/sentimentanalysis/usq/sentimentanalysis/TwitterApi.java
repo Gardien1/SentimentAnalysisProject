@@ -84,58 +84,22 @@ public class TwitterApi {
     private HashMap<String,String> RetrieveTweets(Subject user)
     {
         HashMap<String,String> foundTweets = new HashMap<String, String>();
-
-        try
+        Document parsedDoc = HttpRetriever.getData("https://mobile.twitter.com/" + user.getTwitterHandle());
+        Elements tweets = parsedDoc.getElementsByClass("tweet-text");
+        Elements timeStamps = parsedDoc.getElementsByClass("timestamp");
+        Elements idElements = parsedDoc.getElementsByAttributeValueContaining("name" , "tweet_");
+        for(int i = 0; i< idElements.size() ; i++)
         {
-            URL selectedUrl = new URL("https://mobile.twitter.com/" + user.getTwitterHandle());
-            HttpURLConnection connection = (HttpURLConnection) selectedUrl.openConnection();
-            connection.setRequestMethod("GET");
-
-            InputStream input = connection.getInputStream();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-
-            StringBuffer response = new StringBuffer();
-            String line;
-
-            while((line = reader.readLine()) != null)
+            if(!SearchForID(ParseID(idElements.get(i).attr("name")) , user))
             {
-                response.append(line);
-            }
-
-            reader.close();
-            connection.disconnect();
-
-            Document parsedDoc = Jsoup.parse(response.toString());
-
-            Elements tweets = parsedDoc.getElementsByClass("tweet-text");
-            Elements timeStamps = parsedDoc.getElementsByClass("timestamp");
-            Elements idElements = parsedDoc.getElementsByAttributeValueContaining("name" , "tweet_");
-
-            for(int i = 0; i< idElements.size() ; i++)
-            {
-                if(!SearchForID(ParseID(idElements.get(i).attr("name")) , user))
+                String cleanedTweet = CleanTweet(tweets.get(i).text());
+                Log.i("SEARCH TEST" , "NOT FOUND: SCANNING");
+                Log.i("SEARCH TEST" , cleanedTweet);
+                if(!cleanedTweet.equals(""))
                 {
-                    String cleanedTweet = CleanTweet(tweets.get(i).text());
-                    Log.i("SEARCH TEST" , "NOT FOUND: SCANNING");
-                    Log.i("SEARCH TEST" , cleanedTweet);
+                    foundTweets.put(ParseID(idElements.get(i).attr("name")) , cleanedTweet); } } else {
+                Log.i("SEARCH TEST" , "FOUND : IGNORING"); } }
 
-                    if(!cleanedTweet.equals(""))
-                    {
-                        foundTweets.put(ParseID(idElements.get(i).attr("name")) , cleanedTweet);
-                    }
-
-                }
-                else
-                {
-                    Log.i("SEARCH TEST" , "FOUND : IGNORING");
-                }
-            }
-        }
-        catch(IOException e)
-        {
-            Log.e("RETRIEVE TWEET", "Error: cannot get url");
-        }
 
         return foundTweets;
 

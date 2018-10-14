@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/ui_background"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
     tools:layout_editor_absoluteY="81dp"
@@ -15,6 +16,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="61dp"
         android:text="Sentiment Analysis"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -25,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="80dp"
         android:layout_marginStart="32dp"
-        android:text="Settings"
+        android:background="@drawable/button_settings"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -35,7 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="44dp"
         android:layout_marginTop="80dp"
-        android:text="Stats"
+        android:background="@drawable/button_stats"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/twitterData_layout" />
 
@@ -47,6 +49,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="36dp"
+        android:background="@color/colorPrimary"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -64,6 +67,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:text="Account status:"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintStart_toStartOf="@+id/main_activity_title"
         app:layout_constraintTop_toBottomOf="@+id/main_activity_title" />
 

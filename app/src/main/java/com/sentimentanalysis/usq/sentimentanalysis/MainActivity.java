@@ -35,8 +35,30 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Emulate splash screen
+        // Will need to rework
+        setContentView(R.layout.content_splash_screen);
+
         manager = new SentimentAnalysisManager(this,this.getBaseContext().getAssets());
-        manager.start();
+
+        Thread timer = new Thread(){
+            public void run()
+            {
+                try
+                {
+                    sleep(4000);
+                }
+                catch(Exception e)
+                {
+
+                }
+                finally
+                {
+                    manager.start();
+                }
+            }
+        };
+        timer.start();
 
     }
 

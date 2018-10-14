@@ -2,6 +2,9 @@ package com.sentimentanalysis.usq.sentimentanalysis;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.provider.CalendarContract;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -9,12 +12,22 @@ import android.webkit.HttpAuthHandler;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
+
+import com.jjoe64.graphview.GraphView;
 
 import org.w3c.dom.Text;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -31,7 +44,7 @@ public class SentimentAnalysisManager {
     private DataAnalyser dataAnalyser;
     private ViewDataGatherer viewDataGatherer;
     private ScanTime time;
-
+    private ScanHistory scanHistoryObj;
 
 
     public boolean getStartedAnalysis()
@@ -64,10 +77,32 @@ public class SentimentAnalysisManager {
     }
 
 
-    // TODO: Graph backend module and frontend.
-    // TODO: Twitter handle verification.
     public SentimentAnalysisManager(AppCompatActivity appContext , AssetManager inputAssetManager)
     {
+        // Instantiate variables.
+        assetManager = inputAssetManager;
+        context = appContext;
+
+
+        File scanHistory = new File(context.getFilesDir(), "scan_history.txt");
+        // Debug will be fully removed in full version.
+        scanHistory.delete();
+        if(scanHistory.exists())
+        {
+            loadScanHistory();
+        }
+        else
+        {
+            scanHistoryObj = new ScanHistory();
+        }
+
+
+        subjectList = new SubjectList(appContext , new Lexicon(GetLexicon()),scanHistoryObj);
+        listener = null;
+        time = new ScanTime();
+        final ScanHistory scanHistoryObj = new ScanHistory("none");
+        final GraphManager graphManager = new GraphManager(context);
+
         // Setup interfaces.
 
         // Functions can be overridden externally.
@@ -76,7 +111,10 @@ public class SentimentAnalysisManager {
             @Override
             public void onFinishAnalysis() {
 
-                UIUpdater.UpdateMainScanTime(context , "Last Scanned: " + "[ADD TIME STUFF]");
+                UIUpdater.UpdateMainScanTime(context , "Last Scanned: " + time.getCurrentTime());
+                scanHistoryObj.setLastScanTime(time.getCurrentTime());
+                // Save scan history.
+                saveScanHistory(subjectList.getScanHistory());
             }
 
             @Override
@@ -95,12 +133,15 @@ public class SentimentAnalysisManager {
                 {
                     final TextView userName = new TextView(context);
                     userName.setText(key);
+                    userName.setTextSize(23);
+                    userName.setPadding(0,15,0,15);
+                    userName.setTextColor(Color.parseColor("#ffffff"));
                     output.addView(userName);
 
                     final Button removeButton = new Button(context);
 
-                    removeButton.setText("Remove");
-
+                    removeButton.setBackgroundResource(R.drawable.button_remove);
+                    removeButton.setLayoutParams(new LinearLayout.LayoutParams(400,100));
                     removeButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -116,7 +157,7 @@ public class SentimentAnalysisManager {
 
             @Override
             public void inflateSetupPage() {
-                // TODO: Background processing for setup.
+                // TODO: Background processing for setup (MAY REMOVE THIS FUNCTION).
 
             }
 
@@ -135,22 +176,14 @@ public class SentimentAnalysisManager {
 
                     TextView tmpText = new TextView(context);
 
+                    tmpText.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                    tmpText.setTextSize(20);
+                    tmpText.setPadding(0,12,0,0);
                     tmpText.setText(key + ":" + status );
+                    //tmpText.setBackgroundResource(R.drawable.input_background);
 
                     dataOutput.addView(tmpText);
                 }
-            }
-        };
-
-        dataAnalyser = new DataAnalyser() {
-            @Override
-            public void processSettingsData(HashMap<String, String> settingsData) {
-                for(String key : settingsData.keySet())
-                {
-                    subjectList.addSubject("NONE" , settingsData.get(key));
-                }
-
-                subjectList.saveSubjects();
             }
         };
 
@@ -168,31 +201,104 @@ public class SentimentAnalysisManager {
                     beginAnalysis();
                     hasStartedAnalysis = true;
                 }
+
+                // Update reset scan time if it exists.
+                if(scanHistoryObj.getLastScanTime() != "none")
+                {
+                    UIUpdater.UpdateMainScanTime(context,scanHistoryObj.getLastScanTimeFormatted());
+                }
             }
 
             @Override
             public void onSettingsViewLoaded() {
-                // TODO: Run settings background processes.
-                // TODO: Handle errors.
-
                 dynamicContentManager.inflateSettingsPage();
                 OnClickManager.attachOnHandlersOnSettings(context,viewManager,dataAnalyser);
             }
 
             @Override
             public void onSetupViewLoaded() {
-                // TODO: Handle errors.
                 OnClickManager.attachHandlersOnSetup(context,viewManager,dataAnalyser);
+            }
+
+            @Override
+            public void onGraphViewLoaded()
+            {
+                OnClickManager.attachHandlersOnGraphView(context,viewManager,dataAnalyser);
+
+                // Get graph view.
+                GraphView graphView = (GraphView) context.findViewById(R.id.statsGraph);
+                graphView.setBackgroundColor(Color.parseColor("#ffffff"));
+                graphView.setTitle("Daily Scores");
+                // Load Graph Data
+                graphManager.setGraph(graphView);
+
+                // TODO: May need to run this on a seperate thread.
+                // Test
+                ArrayList<Date> x_axis = new ArrayList<Date>();
+                ArrayList<Integer> y_axis = new ArrayList<Integer>();
+
+
+                Calendar testInstance = time.getScanTimeInstance();
+
+                x_axis.add(testInstance.getTime());
+                testInstance.add(Calendar.DATE , 1);
+                x_axis.add(testInstance.getTime());
+                testInstance.add(Calendar.DATE , 1);
+                x_axis.add(testInstance.getTime());
+
+                y_axis.add(5);
+                y_axis.add(10);
+                y_axis.add(7);
+
+                Log.i("ScanHistory" , Integer.toString(subjectList.getScanHistory().getScanHistory().size()));
+
+                // Subject list continually updates the scan list until it is loaded from disk.
+                graphManager.updateGraph(subjectList.getScanHistory().getScanHistory(),context);
+
             }
         });
 
-        // Instantiate variables.
-        assetManager = inputAssetManager;
-        context = appContext;
-        subjectList = new SubjectList(appContext , new Lexicon(GetLexicon()));
-        listener = null;
-        time = new ScanTime();
+        dataAnalyser = new DataAnalyser() {
+            @Override
+            public void processSettingsData(final HashMap<String, String> settingsData) {
 
+                new Thread(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        Boolean failed = false;
+                        for(final String key : settingsData.keySet())
+                        {
+                            if(!TwitterVerifier.verifyTwitterHandle(settingsData.get(key)))
+                            {
+                                Log.i("ERROR KEY" , key);
+                                context.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        LinearLayout twitterOuputs = (LinearLayout) context.findViewById(R.id.setup_data_ouput_layout);
+                                        TextView errorDiv = twitterOuputs.findViewWithTag("errorElement-"+key);
+                                        errorDiv.setVisibility(View.VISIBLE);
+                                    }
+                                });
+
+                                failed = true;
+                            }
+                            else
+                            {
+                                subjectList.addSubject("NONE" , settingsData.get(key));
+                            }
+                        }
+
+                        if(!failed)
+                        {
+                            subjectList.saveSubjects();
+                            onSubjectSaved();
+                        }
+                    }
+                }).start();
+            }
+        };
     }
 
     /**
@@ -205,7 +311,10 @@ public class SentimentAnalysisManager {
         // Check for first time use.
         File settingsFile = new File(context.getFilesDir() , "subjects.txt");
 
-        //settingsFile.delete();
+        // DEBUG -- WILL NEED TO DELETE
+        settingsFile.delete();
+        //-------------------------
+
 
         if(settingsFile.exists())
         {
@@ -217,6 +326,7 @@ public class SentimentAnalysisManager {
         {
             viewManager.changeToSetupView(context);
         }
+
     }
 
     /*
@@ -280,20 +390,8 @@ public class SentimentAnalysisManager {
 
                         // If behaviour is overidden
                         // May need to relook at this.
-                        if(listener != null)
-                        {
-                            listener.onFinishAnalysis();
-                        }
-                        else
-                        {
-                            context.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    UIUpdater.UpdateMainScanTime(context , "Last Scanned: " + time.getCurrentTime());
-                                }
-                            });
+                        listener.onFinishAnalysis();
 
-                        }
 
 
                         Thread.sleep(60000);
@@ -310,6 +408,44 @@ public class SentimentAnalysisManager {
         catch(Exception e)
         {
             Log.i("ANALYSE ERROR" , e.toString());
+        }
+
+    }
+    // Maybe put this function to a history manager.
+    private void saveScanHistory(ScanHistory scanHistory)
+    {
+        File scanHistoryFile = new File(context.getFilesDir(),"scan_history.txt");
+        try
+        {
+            ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(scanHistoryFile));
+
+            output.writeObject(scanHistory);
+
+            output.close();
+
+        }
+        catch(Exception e)
+        {
+            Log.e("Save Scan History" , "Failed to save scan history:" + e.toString() );
+        }
+    }
+
+    private void loadScanHistory()
+    {
+        // Bad coding... not reusing.
+        // TODO: Rework this code to be reused.
+        File scanHistoryFile = new File(context.getFilesDir(),"scan_history.txt");
+
+        try
+        {
+            ObjectInputStream input = new ObjectInputStream(new FileInputStream(scanHistoryFile));
+            scanHistoryObj = (ScanHistory) input.readObject();
+
+            input.close();
+        }
+        catch(Exception e)
+        {
+            Log.e("Load Scan History" , "Failed to load scan history " + e.toString());
         }
 
     }
@@ -333,6 +469,17 @@ public class SentimentAnalysisManager {
         }
 
         return lexiconData;
+    }
+
+    private void onSubjectSaved()
+    {
+        context.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                viewManager.changeToMainView(context);
+            }
+        });
+
     }
 
 }

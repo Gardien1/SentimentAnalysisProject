@@ -1,5 +1,8 @@
 package com.sentimentanalysis.usq.sentimentanalysis;
 
+import android.provider.CalendarContract;
+
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -12,13 +15,14 @@ import java.util.Calendar;
  * @LastUpdated: 19/09/2018
  *
  */
-public class ScanTime {
+public class ScanTime implements Serializable{
 
     private DateFormat formatter;
+    private Calendar time = Calendar.getInstance();
 
     public ScanTime()
     {
-        formatter = new SimpleDateFormat("hh::mm:ss dd-mm-yyyy");
+        formatter = new SimpleDateFormat("hh:mm dd-MM-yyyy");
     }
 
 
@@ -42,8 +46,18 @@ public class ScanTime {
      * */
     public String getCurrentTime()
     {
-        Calendar time = Calendar.getInstance();
+        time = Calendar.getInstance();
         return formatter.format(time.getTime());
+    }
+
+    public Calendar getScanTimeInstance()
+    {
+        return time;
+    }
+
+    public void setScanInstance(Calendar input)
+    {
+        time = input;
     }
 
 

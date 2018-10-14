@@ -10,6 +10,8 @@ import android.util.Log;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -28,6 +30,9 @@ public class Subject implements Serializable{
 	private int dailyTrend = 0;
 	private Boolean isNegative = false;
 	private ArrayList<String> scannedTweets = new ArrayList<String>();
+	private ScanTime lastScanned = new ScanTime();
+	private ScanTime firstScanned = new ScanTime();
+	private int scoreCounter = 0;
 
 	
 	/**
@@ -71,8 +76,28 @@ public class Subject implements Serializable{
 	 * daily trend counter.  If the score is not lower, it resets
 	 * the daily trend counter.
 	 */
-	// TODO: Will need to test code ove 3 days.
-	public void testDailyTrend( Context context, NotificationManager notificationManager ) {
+	// TODO: Will need to test code over 3 days.
+	public void testDailyTrend( ) {
+
+		// If we have three days of data, check trend.
+		Integer scoreTotal = 0;
+		if(scoreCounter >= 3)
+		{
+
+			for(Integer score : dailyScore)
+			{
+				scoreTotal += score;
+			}
+		}
+
+		// Depression sign if score is less then 0.
+		if(scoreTotal < 0)
+		{
+			//notifyOfNegativeTrend( context, notificationManager );
+			Log.i("TEST DAILY TREND" , "DEPRESSION DETECTED: SENDING NOTIFICATON!");
+		}
+
+		/*
 			if( dailyScore.get(0) < dailyScore.get(1) ) {
 				dailyTrend++;
 				if(dailyTrend >= 3) {
@@ -87,9 +112,10 @@ public class Subject implements Serializable{
 			if( dailyScore.size() > 29 )
 			    dailyScore.remove( 29 );
 			dailyScore.add(0,0);
+			*/
 	}
 	
-	public void analyseTweets( Lexicon lexicon, TwitterApi twitterApi) {
+	public void analyseTweets( Lexicon lexicon, TwitterApi twitterApi, ScanHistory history) {
         HashMap<String,String> tweetList = twitterApi.GetTweetsSingleUser( this );
         //Integer score = dailyScore.get(0);
 		Integer score = 0;
@@ -103,7 +129,41 @@ public class Subject implements Serializable{
 
         Log.i("SCORE TEST" , "Handle: " + twitterHandle + " Score: " + score.toString());
 
-        //dailyScore.set( 0,score );
+        // Check if it is a new day
+		Calendar currentTime = Calendar.getInstance();
+
+		if(currentTime.get(Calendar.DAY_OF_MONTH) > lastScanned.getScanTimeInstance().get(Calendar.DAY_OF_MONTH) &&
+				currentTime.get(Calendar.MONTH) >= lastScanned.getScanTimeInstance().get(Calendar.MONTH))
+		{
+			scoreCounter++;
+			dailyScore.set( scoreCounter,score );
+			Log.i("ANALYSE TWEETS" , "NEW DAY. SETTING A NEW SCORE: DAY COUNT: " + dailyScore.size());
+
+		}
+		else
+		{
+			// If score is still in same day. Just add to current one.
+            Integer currentScore = score;
+
+            if(dailyScore.size() >= scoreCounter && dailyScore.size() != 0)
+            {
+                currentScore += dailyScore.get(scoreCounter);
+				dailyScore.set(scoreCounter,currentScore);
+            }
+            else
+			{
+				dailyScore.add(scoreCounter,currentScore);
+			}
+
+
+
+			Log.i("ANALYSE TWEETS" , "SAME DAY SAME SCORE");
+		}
+
+		history.addToHistory((Date)currentTime.getTime(),score);
+		// Check trend if needed.
+		//testDailyTrend();
+
     }
 
     public void addScannedTweet(String tweetId)

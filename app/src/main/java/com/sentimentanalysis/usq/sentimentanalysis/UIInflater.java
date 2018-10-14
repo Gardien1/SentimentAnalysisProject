@@ -30,4 +30,5 @@ public interface UIInflater {
      * */
     void inflateMainPage();
 
+
 }

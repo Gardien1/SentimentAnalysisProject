@@ -27,13 +27,15 @@ public abstract class ViewDataGatherer {
     public static HashMap<String,String> getSettingsData(LinearLayout settingsOutput)
     {
         HashMap<String,String> settingsData = new HashMap<String,String>();
-
+        int twitterInputActualCounter = 0;
         for(int i =0; i<settingsOutput.getChildCount(); i++)
         {
             if(settingsOutput.getChildAt(i).getClass() == EditText.class)
             {
                 EditText tmpChild = (EditText) settingsOutput.getChildAt(i);
-                settingsData.put(Integer.toString(i) , tmpChild.getText().toString());
+
+                settingsData.put(Integer.toString(twitterInputActualCounter) , tmpChild.getText().toString());
+                twitterInputActualCounter++;
             }
         }
 

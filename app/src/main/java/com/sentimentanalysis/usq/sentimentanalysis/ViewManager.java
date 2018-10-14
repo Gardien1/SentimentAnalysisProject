@@ -32,6 +32,7 @@ public class ViewManager {
         void  onMainViewLoaded();
         void onSettingsViewLoaded();
         void onSetupViewLoaded();
+        void onGraphViewLoaded();
     }
 
     /**
@@ -40,10 +41,16 @@ public class ViewManager {
      * @input: AppCompactActivity - context of the application.
      *
      * */
-    public void changeToSetupView(AppCompatActivity viewContext)
+    public void changeToSetupView(final AppCompatActivity viewContext)
     {
-        viewContext.setContentView(R.layout.content_setup);
-        broadcast.onSetupViewLoaded();
+        viewContext.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                viewContext.setContentView(R.layout.content_setup);
+                broadcast.onSetupViewLoaded();
+            }
+        });
+
     }
 
 
@@ -53,10 +60,12 @@ public class ViewManager {
      * @input: AppCompactActivity - context of the application.
      *
      * */
-    public void changeToSettingsView(AppCompatActivity viewContext)
+    public void changeToSettingsView(final AppCompatActivity viewContext)
     {
+
         viewContext.setContentView(R.layout.content_setup);
         broadcast.onSettingsViewLoaded();
+
     }
 
     /**
@@ -65,9 +74,24 @@ public class ViewManager {
      * @input: AppCompactActivity - context of the application.
      *
      * */
-    public void changeToMainView(AppCompatActivity viewContext)
+    public void changeToMainView(final AppCompatActivity viewContext)
     {
+
         viewContext.setContentView(R.layout.content_main);
         broadcast.onMainViewLoaded();
+
+
+    }
+
+    public void changeToGraphView(final AppCompatActivity viewContext)
+    {
+        viewContext.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                viewContext.setContentView(R.layout.content_stats);
+            }
+        });
+
+        broadcast.onGraphViewLoaded();
     }
 }
