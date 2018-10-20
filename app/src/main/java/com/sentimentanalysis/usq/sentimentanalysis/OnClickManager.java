@@ -2,7 +2,9 @@ package com.sentimentanalysis.usq.sentimentanalysis;
 
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Layout;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -107,7 +109,10 @@ public abstract class OnClickManager {
                 twitterInput.setTextColor(Color.parseColor("#ffffff"));
 
                 final Button removeBtn = new Button(context);
-                removeBtn.setBackgroundResource(R.drawable.button_remove);
+                removeBtn.setBackgroundResource(R.color.colorAccent);
+                removeBtn.setText("Remove");
+                removeBtn.setTextColor(Color.parseColor("#ffffff"));
+                removeBtn.setGravity(Gravity.CENTER);
                 removeBtn.setLayoutParams(new LinearLayout.LayoutParams(400,100));
                 removeBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -164,7 +169,9 @@ public abstract class OnClickManager {
                 twitterInput.setTextSize(23);
                 twitterInput.setTextColor(Color.parseColor("#ffffff"));
                 final Button remove_btn = new Button(context);
-                remove_btn.setBackgroundResource(R.drawable.button_remove);
+                remove_btn.setBackgroundResource(R.color.colorAccent);
+                remove_btn.setTextColor(Color.parseColor("#ffffff"));
+                remove_btn.setText("Remove");
                 remove_btn.setLayoutParams(new LinearLayout.LayoutParams(400,100));
                 remove_btn.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -189,6 +196,18 @@ public abstract class OnClickManager {
             @Override
             public void onClick(View view) {
                 vManager.changeToMainView(context);
+            }
+        });
+    }
+
+    public static void attacheHandlersOnWelcome(final AppCompatActivity context , final ViewManager vManager , final DataAnalyser pManager)
+    {
+        Button getStartedButton = (Button) context.findViewById(R.id.getStarted_btn);
+
+        getStartedButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                vManager.changeToSetupView(context);
             }
         });
     }

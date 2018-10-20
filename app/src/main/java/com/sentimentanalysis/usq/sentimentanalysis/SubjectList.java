@@ -17,6 +17,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 
 /**
@@ -27,12 +28,13 @@ import java.util.HashMap;
  * @since	2018-09-12
  */
 public class SubjectList {
-    private Subject NOBODY = new Subject( "", "" );
+    private Subject NOBODY = new Subject( "" );
     private Lexicon LEXICON;
     private TwitterApi TWITTER_API = new TwitterApi();
     private ScanHistory scanHistory;
     private ArrayList<Subject> subjects = new ArrayList<Subject>(30);
     private Context applicationContext;
+    private NotificationManager notificationManager;
 
     public HashMap<String,Boolean> getSubjectData()
     {
@@ -47,15 +49,16 @@ public class SubjectList {
     }
 
 
-    public SubjectList(Context appContext , Lexicon lexiconObj, ScanHistory history)
+    public SubjectList(Context appContext , Lexicon lexiconObj, ScanHistory history, NotificationManager notificationManager)
     {
         applicationContext = appContext;
         LEXICON = lexiconObj;
         scanHistory = history;
+        this.notificationManager = notificationManager;
     }
 
-    public void addSubject( String name,  String handle ) {
-        subjects.add(new Subject( name,  handle ));
+    public void addSubject( String handle ) {
+        subjects.add(new Subject( handle ));
     }
 
     public void loadSubjects() {
@@ -69,9 +72,9 @@ public class SubjectList {
             boolean isDone = false;
             while (!isDone) {
                 try {
-
+                    // Todo: Check for end of file before loading
                     Subject subject = (Subject) input.readObject();
-                    if (subject != NOBODY)
+                    if (subject != null)
                     {
                         Log.i("LOAD SUBJECTS" , "Scanned tweet size: " + subject.getScannedTweets().size());
                         subjects.add(subject);
@@ -85,6 +88,11 @@ public class SubjectList {
                     isDone = true;
                     exception.printStackTrace();
                 }
+                catch(Exception e)
+                {
+                    Log.e("LOAD SUBJECT ERROR","SUBJECTS ERROR: " + e.toString());
+                    isDone = true;
+                }
             }
 
             input.close();
@@ -92,6 +100,7 @@ public class SubjectList {
         } catch (IOException exception) {
             exception.printStackTrace();
         }
+
     }
 
     public void saveSubjects()  {
@@ -126,16 +135,13 @@ public class SubjectList {
         for(int i=0; i < subjects.size() ; i++)
         {
             Log.i("ANALYSE CALL" , subjects.get(i).getTwitterHandle());
-            subjects.get(i).analyseTweets(LEXICON, TWITTER_API,scanHistory);
+            subjects.get(i).analyseTweets( LEXICON, TWITTER_API, scanHistory, applicationContext, notificationManager );
             Log.i("ANALYSE CALL" , subjects.get(i).getTwitterHandle() + " saving tweets");
         }
+
+        saveSubjects();
     }
 
-    public void testDailyTrends(Context context, NotificationManager notificationManager ) {
-        for ( Subject subject :  subjects ) {
-            //subject.testDailyTrend( context, notificationManager );
-        }
-    }
 
     public boolean removeSubject(String twitterHandle)
     {
@@ -153,7 +159,7 @@ public class SubjectList {
 
     public void emptyList()
     {
-        subjects.removeAll(subjects);
+        subjects.clear();
     }
 
     public ScanHistory getScanHistory() {

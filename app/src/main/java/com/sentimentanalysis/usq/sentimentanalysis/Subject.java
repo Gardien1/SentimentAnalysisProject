@@ -1,5 +1,6 @@
 package com.sentimentanalysis.usq.sentimentanalysis;
 
+import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -8,11 +9,16 @@ import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+
+import static android.os.SystemClock.sleep;
 
 /**
  * An instance of a subject being monitored in the app.  Contains
@@ -24,45 +30,39 @@ import java.util.HashMap;
  */
 public class Subject implements Serializable{
 	private static final long serialVersionUID = 1L;
-	private String name;
 	private String twitterHandle;
 	private ArrayList<Integer> dailyScore = new ArrayList<Integer>(30);
 	private int dailyTrend = 0;
 	private Boolean isNegative = false;
 	private ArrayList<String> scannedTweets = new ArrayList<String>();
 	private ScanTime lastScanned = new ScanTime();
-	private ScanTime firstScanned = new ScanTime();
 	private int scoreCounter = 0;
 
 	
 	/**
-	 * @param n			name of the subject
 	 * @param handle	twitter handle, after the {@literal @} symbol
 	 */
-	public Subject( String n, String handle ) {
-		name = n;
+	public Subject( String handle ) {
 		twitterHandle = handle;
 	}
-	
-	public String getName() { return name; };
+
 	public String getTwitterHandle() { return twitterHandle; };
 	public ArrayList<Integer> getDailyScore()  { return dailyScore; };
 	public Boolean getAlertStatus(){return isNegative; };
 	public ArrayList<String> getScannedTweets(){return scannedTweets;};
 
-	public void ResetStatus()
-	{
-		isNegative = false;
-	}
+
+
 
 	public void notifyOfNegativeTrend( Context context, NotificationManager notificationManager) {
-
 		NotificationCompat.Builder trendNotification =
 				new NotificationCompat.Builder(context, "NT")
+                        .setSmallIcon(R.drawable.social_alert_icon)
 						.setContentTitle("Sentiment Analysis")
-						.setContentText(name + "has had a trend of more negative days.")
+						.setContentText(twitterHandle + "has had a trend of more negative days.")
 						.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 						.setAutoCancel(true);
+
 
 		notificationManager.notify(1, trendNotification.build());
 
@@ -76,46 +76,21 @@ public class Subject implements Serializable{
 	 * daily trend counter.  If the score is not lower, it resets
 	 * the daily trend counter.
 	 */
-	// TODO: Will need to test code over 3 days.
-	public void testDailyTrend( ) {
-
-		// If we have three days of data, check trend.
-		Integer scoreTotal = 0;
-		if(scoreCounter >= 3)
-		{
-
-			for(Integer score : dailyScore)
-			{
-				scoreTotal += score;
-			}
-		}
-
-		// Depression sign if score is less then 0.
-		if(scoreTotal < 0)
-		{
-			//notifyOfNegativeTrend( context, notificationManager );
-			Log.i("TEST DAILY TREND" , "DEPRESSION DETECTED: SENDING NOTIFICATON!");
-		}
-
-		/*
-			if( dailyScore.get(0) < dailyScore.get(1) ) {
-				dailyTrend++;
-				if(dailyTrend >= 3) {
-                    notifyOfNegativeTrend( context, notificationManager );
-                    isNegative = true;
-					dailyTrend = 0;
-				}
-			}
-			else
+	public void testDailyTrend( Context context, NotificationManager notificationManager ) {
+		if( dailyScore.size() > 1 && dailyScore.get(scoreCounter - 1) < dailyScore.get(scoreCounter - 2) ) {
+			dailyTrend++;
+			if(dailyTrend >= 3) {
+				notifyOfNegativeTrend( context, notificationManager );
+				isNegative = true;
 				dailyTrend = 0;
-
-			if( dailyScore.size() > 29 )
-			    dailyScore.remove( 29 );
-			dailyScore.add(0,0);
-			*/
+			}
+		}
+		else
+			dailyTrend = 0;
+		    isNegative = false;
 	}
 	
-	public void analyseTweets( Lexicon lexicon, TwitterApi twitterApi, ScanHistory history) {
+	public void analyseTweets( Lexicon lexicon, TwitterApi twitterApi, ScanHistory history, Context context, NotificationManager notificationManager ) {
         HashMap<String,String> tweetList = twitterApi.GetTweetsSingleUser( this );
         //Integer score = dailyScore.get(0);
 		Integer score = 0;
@@ -132,13 +107,15 @@ public class Subject implements Serializable{
         // Check if it is a new day
 		Calendar currentTime = Calendar.getInstance();
 
+		// TODO: Change after showing Daniel
 		if(currentTime.get(Calendar.DAY_OF_MONTH) > lastScanned.getScanTimeInstance().get(Calendar.DAY_OF_MONTH) &&
 				currentTime.get(Calendar.MONTH) >= lastScanned.getScanTimeInstance().get(Calendar.MONTH))
-		{
+        //if(true)
+        {
 			scoreCounter++;
-			dailyScore.set( scoreCounter,score );
+			dailyScore.add( score );
 			Log.i("ANALYSE TWEETS" , "NEW DAY. SETTING A NEW SCORE: DAY COUNT: " + dailyScore.size());
-
+            testDailyTrend(context, notificationManager);
 		}
 		else
 		{
@@ -161,8 +138,7 @@ public class Subject implements Serializable{
 		}
 
 		history.addToHistory((Date)currentTime.getTime(),score);
-		// Check trend if needed.
-		//testDailyTrend();
+
 
     }
 
@@ -173,30 +149,9 @@ public class Subject implements Serializable{
 
     @Override
     public String toString() {
-		return "Name:" + name +   "\nTwitter Handle:" + twitterHandle + "\nDaily Scores:"
+		return "Twitter Handle:" + twitterHandle + "\nDaily Scores:"
 				+ dailyScore.toString();
 	}
 
-/*    public void saveData(File newSubjects) {
-
-
-	    try {
-            newSubjects.createNewFile();
-            FileWriter writer = new FileWriter(newSubjects);
-
-            writer.write( name + ":" + twitterHandle + "\n" );
-
-            for ( Integer score : dailyScore ) {
-                writer.write(score.toString() + " "  );
-            }
-
-            writer.write("\n");
-            writer.close();
-
-        } catch (IOException e){
-	        e.printStackTrace();
-        }
-    }
-    */
-
+    public Boolean isValid() { return twitterHandle != ""; }
 }

@@ -1,5 +1,6 @@
 package com.sentimentanalysis.usq.sentimentanalysis;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Color;
@@ -77,7 +78,7 @@ public class SentimentAnalysisManager {
     }
 
 
-    public SentimentAnalysisManager(AppCompatActivity appContext , AssetManager inputAssetManager)
+    public SentimentAnalysisManager(AppCompatActivity appContext , AssetManager inputAssetManager, NotificationManager notificationManager)
     {
         // Instantiate variables.
         assetManager = inputAssetManager;
@@ -97,7 +98,7 @@ public class SentimentAnalysisManager {
         }
 
 
-        subjectList = new SubjectList(appContext , new Lexicon(GetLexicon()),scanHistoryObj);
+        subjectList = new SubjectList(appContext , new Lexicon(GetLexicon()),scanHistoryObj, notificationManager );
         listener = null;
         time = new ScanTime();
         final ScanHistory scanHistoryObj = new ScanHistory("none");
@@ -140,7 +141,9 @@ public class SentimentAnalysisManager {
 
                     final Button removeButton = new Button(context);
 
-                    removeButton.setBackgroundResource(R.drawable.button_remove);
+                    removeButton.setBackgroundResource(R.color.colorAccent);
+                    removeButton.setText("Remove");
+                    removeButton.setTextColor(Color.parseColor("#ffffff"));
                     removeButton.setLayoutParams(new LinearLayout.LayoutParams(400,100));
                     removeButton.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -221,6 +224,11 @@ public class SentimentAnalysisManager {
             }
 
             @Override
+            public void onWelcomePageLoaded(){
+                OnClickManager.attacheHandlersOnWelcome(context,viewManager,dataAnalyser);
+            }
+
+            @Override
             public void onGraphViewLoaded()
             {
                 OnClickManager.attachHandlersOnGraphView(context,viewManager,dataAnalyser);
@@ -286,7 +294,7 @@ public class SentimentAnalysisManager {
                             }
                             else
                             {
-                                subjectList.addSubject("NONE" , settingsData.get(key));
+                                subjectList.addSubject( settingsData.get(key) );
                             }
                         }
 
@@ -312,7 +320,7 @@ public class SentimentAnalysisManager {
         File settingsFile = new File(context.getFilesDir() , "subjects.txt");
 
         // DEBUG -- WILL NEED TO DELETE
-        settingsFile.delete();
+        //settingsFile.delete();
         //-------------------------
 
 
@@ -324,7 +332,10 @@ public class SentimentAnalysisManager {
         }
         else
         {
+            // Run setup animation
+
             viewManager.changeToSetupView(context);
+            viewManager.changeToWelcomeView(context);
         }
 
     }
@@ -388,13 +399,14 @@ public class SentimentAnalysisManager {
                         Log.i("MANAGER CALL" , "TWEETS ANALYSIS FINISHED....");
                         subjectList.saveSubjects();
 
+
                         // If behaviour is overidden
                         // May need to relook at this.
                         listener.onFinishAnalysis();
 
 
 
-                        Thread.sleep(60000);
+                        Thread.sleep(6000);
                     }
                 }
                 catch(Exception e)

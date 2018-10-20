@@ -4,19 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/ui_background"
+    android:background="#1791be"
     tools:layout_editor_absoluteY="81dp">
 
     <TextView
         android:id="@+id/title_setup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="46dp"
+        android:layout_marginBottom="19dp"
         android:layout_marginTop="82dp"
         android:text="Setup"
         android:textColor="@color/colorPrimary"
         android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/setup_data_ouput_layout"
+        app:layout_constraintBottom_toTopOf="@+id/title_twitterhandleinput"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -24,21 +24,23 @@
     <TextView
         android:id="@+id/title_twitterhandleinput"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="31dp"
-        android:layout_marginTop="27dp"
+        android:layout_height="29dp"
+        android:layout_marginStart="44dp"
         android:text="Please enter in the twitter handles to monitor."
         android:textColor="@color/colorPrimary"
         android:textSize="15sp"
+        app:layout_constraintBottom_toTopOf="@+id/setup_data_ouput_layout"
         app:layout_constraintStart_toStartOf="@+id/setup_data_ouput_layout"
         app:layout_constraintTop_toBottomOf="@+id/title_setup" />
 
     <Button
         android:id="@+id/addHandle_btn"
-        android:layout_width="wrap_content"
+        android:layout_width="184dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="33dp"
-        android:background="@drawable/button_add_more_accounts"
+        android:background="@android:color/holo_blue_light"
+        android:text="Add More Accounts"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintBottom_toTopOf="@+id/save_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -49,7 +51,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="42dp"
-        android:background="@drawable/button_finish"
+        android:background="#33b5e5"
+        android:text="Finish"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintBaseline_toBaselineOf="@+id/save_btn"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -64,7 +68,7 @@
         app:layout_constraintBottom_toTopOf="@+id/addHandle_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_setup"></LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/title_twitterhandleinput"></LinearLayout>
 
     <Button
         android:id="@+id/save_btn"
@@ -72,7 +76,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:layout_marginStart="3dp"
-        android:background="@drawable/button_finish"
+        android:text="Finish"
+        android:textColor="@color/colorPrimary"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/finishSetup_btn"

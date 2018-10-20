@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/ui_background"
+    android:background="#1791be"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity"
     tools:layout_editor_absoluteY="81dp"
@@ -15,8 +15,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="61dp"
-        android:text="Sentiment Analysis"
+        android:text="Your Family"
         android:textColor="@color/colorPrimary"
+        android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -27,7 +28,9 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="80dp"
         android:layout_marginStart="32dp"
-        android:background="@drawable/button_settings"
+        android:background="@color/colorAccent"
+        android:text="Settings"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -37,7 +40,9 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="44dp"
         android:layout_marginTop="80dp"
-        android:background="@drawable/button_stats"
+        android:background="@color/colorAccent"
+        android:text="Stats"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/twitterData_layout" />
 
@@ -64,8 +69,8 @@
         android:id="@+id/account_status_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
         android:text="Account status:"
         android:textColor="@color/colorPrimary"
         app:layout_constraintStart_toStartOf="@+id/main_activity_title"

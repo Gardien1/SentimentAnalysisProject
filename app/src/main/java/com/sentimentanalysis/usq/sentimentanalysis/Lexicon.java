@@ -21,35 +21,27 @@ public class Lexicon {
 		{
 		    readLexLine(line.next());
 		}
-
-		for(String word: wordScore.keySet())
-        {
-
-           // Log.i("WORD TEST",word);
-
-        }
 	}
 	
 	private void readLexLine( String line ) {
 		List<String> splitLine = Arrays.asList(line.split( " " ));
-		//Log.i("READ LEX LINE" , line);
-		String word = (splitLine.get(2)).replace( "word1","" );
+		String word = (splitLine.get(2)).replace( "word1=","" );
 		Integer score = 0;
 		try {
 
-			if( splitLine.get(5) == "priorpolarity=positive" ) {
-                if ( splitLine.get(0) == "type=weaksubj" )
+			if(splitLine.get(5).equals("priorpolarity=positive")) {
+                if (splitLine.get(0).equals("type=weaksubj"))
                     score = 1;
-                else if ( splitLine.get(0) == "type=strongsubj" )
+                else if (splitLine.get(0).equals("type=strongsubj"))
                     score = 2;
                 else
                     throw new IllegalArgumentException( "No type given." );
             }
 
-			else if ( splitLine.get(5) == "priorpolarity=negative" ) {
-                if ( splitLine.get(0) == "type=weaksubj" )
+			else if (splitLine.get(5).equals("priorpolarity=negative")) {
+                if (splitLine.get(0).equals("type=weaksubj"))
                     score = -1;
-                else if ( splitLine.get(0) == "type=strongsubj" )
+                else if (splitLine.get(0).equals("type=strongsubj"))
                     score = -2;
                 //else
                     //throw new IllegalArgumentException( "No type given." );
@@ -69,15 +61,11 @@ public class Lexicon {
         List<String> words = Arrays.asList(tweet.split( " " ));
         Integer sum = 0;
         for ( String word : words ) {
-
-            //Log.i("LEXICON SCORE" , "WORD TO BE SCANNED: " + word);
-            Log.i("Word Score length", "Length: " + wordScore.keySet().size());
             if(  wordScore.containsKey(word.toLowerCase()) )
             {
                 sum += wordScore.get(word.toLowerCase());
                 Log.i("LEXICON SCORE" , "WORD: " + word + "SCORE: " + wordScore.get(word));
             }
-
         }
         return sum;
     }

@@ -33,6 +33,7 @@ public class ViewManager {
         void onSettingsViewLoaded();
         void onSetupViewLoaded();
         void onGraphViewLoaded();
+        void onWelcomePageLoaded();
     }
 
     /**
@@ -76,9 +77,13 @@ public class ViewManager {
      * */
     public void changeToMainView(final AppCompatActivity viewContext)
     {
-
-        viewContext.setContentView(R.layout.content_main);
-        broadcast.onMainViewLoaded();
+        viewContext.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                viewContext.setContentView(R.layout.content_main);
+                broadcast.onMainViewLoaded();
+            }
+        });
 
 
     }
@@ -86,12 +91,24 @@ public class ViewManager {
     public void changeToGraphView(final AppCompatActivity viewContext)
     {
         viewContext.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+                @Override
+                public void run() {
                 viewContext.setContentView(R.layout.content_stats);
+                broadcast.onGraphViewLoaded();
             }
         });
 
-        broadcast.onGraphViewLoaded();
+
+    }
+
+    public void changeToWelcomeView(final AppCompatActivity viewContext)
+    {
+        viewContext.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                viewContext.setContentView(R.layout.content_welcome);
+                broadcast.onWelcomePageLoaded();
+            }
+        });
     }
 }

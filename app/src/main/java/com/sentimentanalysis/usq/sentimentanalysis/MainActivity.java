@@ -1,5 +1,9 @@
 package com.sentimentanalysis.usq.sentimentanalysis;
 
+import android.annotation.TargetApi;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,6 +20,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Objects;
 
 
 /**
@@ -30,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Main data/backend manager.
     SentimentAnalysisManager manager;
+    NotificationManager notificationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
         // Will need to rework
         setContentView(R.layout.content_splash_screen);
 
-        manager = new SentimentAnalysisManager(this,this.getBaseContext().getAssets());
+        createNotification();
+        manager = new SentimentAnalysisManager(this,this.getBaseContext().getAssets(), notificationManager);
 
         Thread timer = new Thread(){
             public void run()
@@ -82,5 +89,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @TargetApi(26)
+    public void createNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel negativeTrend = new NotificationChannel("NT",
+                    "negativeTrend", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(negativeTrend);
+        } else notificationManager = getSystemService(NotificationManager.class);
     }
 }
