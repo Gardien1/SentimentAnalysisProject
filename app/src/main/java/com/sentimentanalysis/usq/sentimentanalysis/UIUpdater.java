@@ -32,12 +32,14 @@ public abstract class UIUpdater {
         context.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                TextView updateText = (TextView) context.findViewById(R.id.last_updated_txt);
-                updateText.setTextColor(Color.parseColor("#ffffff"));
+                TextView updateText = context.findViewById(R.id.last_updated_txt);
+
 
                 // Ensure element exists.
                 if(updateText != null)
                 {
+                    updateText.setTextColor(Color.parseColor("#ffffff"));
+
                     updateText.setText(text);
 
                     if(updateText.getVisibility() == View.INVISIBLE)

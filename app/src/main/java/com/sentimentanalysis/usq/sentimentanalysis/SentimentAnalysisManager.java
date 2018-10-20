@@ -45,7 +45,8 @@ public class SentimentAnalysisManager {
     private DataAnalyser dataAnalyser;
     private ViewDataGatherer viewDataGatherer;
     private ScanTime time;
-    private ScanHistory scanHistoryObj;
+    private ScanHistory scanHistoryObj = new ScanHistory();
+
 
 
     public boolean getStartedAnalysis()
@@ -83,20 +84,6 @@ public class SentimentAnalysisManager {
         // Instantiate variables.
         assetManager = inputAssetManager;
         context = appContext;
-
-
-        File scanHistory = new File(context.getFilesDir(), "scan_history.txt");
-        // Debug will be fully removed in full version.
-        scanHistory.delete();
-        if(scanHistory.exists())
-        {
-            loadScanHistory();
-        }
-        else
-        {
-            scanHistoryObj = new ScanHistory();
-        }
-
 
         subjectList = new SubjectList(appContext , new Lexicon(GetLexicon()),scanHistoryObj, notificationManager );
         listener = null;
@@ -237,31 +224,17 @@ public class SentimentAnalysisManager {
                 GraphView graphView = (GraphView) context.findViewById(R.id.statsGraph);
                 graphView.setBackgroundColor(Color.parseColor("#ffffff"));
                 graphView.setTitle("Daily Scores");
+
                 // Load Graph Data
                 graphManager.setGraph(graphView);
 
-                // TODO: May need to run this on a seperate thread.
-                // Test
-                ArrayList<Date> x_axis = new ArrayList<Date>();
-                ArrayList<Integer> y_axis = new ArrayList<Integer>();
 
-
-                Calendar testInstance = time.getScanTimeInstance();
-
-                x_axis.add(testInstance.getTime());
-                testInstance.add(Calendar.DATE , 1);
-                x_axis.add(testInstance.getTime());
-                testInstance.add(Calendar.DATE , 1);
-                x_axis.add(testInstance.getTime());
-
-                y_axis.add(5);
-                y_axis.add(10);
-                y_axis.add(7);
-
-                Log.i("ScanHistory" , Integer.toString(subjectList.getScanHistory().getScanHistory().size()));
-
+                Log.i("ScanHistory" , "" + subjectList.getScanHistory().daysScanned.size());
+                Log.i("ScanHistory" , "" + subjectList.getScanHistory().scores.size());
                 // Subject list continually updates the scan list until it is loaded from disk.
-                graphManager.updateGraph(subjectList.getScanHistory().getScanHistory(),context);
+
+                graphManager.updateGraph(subjectList.getScanHistory().daysScanned,subjectList.getScanHistory().scores,context);
+
 
             }
         });
@@ -318,9 +291,11 @@ public class SentimentAnalysisManager {
     {
         // Check for first time use.
         File settingsFile = new File(context.getFilesDir() , "subjects.txt");
+        File scanHistory = new File(context.getFilesDir(), "scan_history.txt");
 
         // DEBUG -- WILL NEED TO DELETE
         //settingsFile.delete();
+        //scanHistory.delete();
         //-------------------------
 
 
@@ -332,7 +307,6 @@ public class SentimentAnalysisManager {
         }
         else
         {
-            // Run setup animation
 
             viewManager.changeToSetupView(context);
             viewManager.changeToWelcomeView(context);
@@ -340,29 +314,13 @@ public class SentimentAnalysisManager {
 
     }
 
-    /*
-    // Performs setup of twitter handles.
-    public void performSetup(ArrayList<String> twitterHandles)
-    {
-        // Create a subject for each handle.
-        for(int i=0; i < twitterHandles.size(); i++)
-        {
-            Log.i("Adding Subject" , twitterHandles.get(i));
-            subjectList.addSubject("NONAME" , twitterHandles.get(i));
-        }
-
-        // Need to edit save file.
-        subjectList.saveSubjects();
-        Log.i("Adding Subject" , "Subjects Saved");
-
-        listener.onDataLoaded();
-    }
-    */
     // Loads required data from file.
     public void loadData()
     {
         // Need to add load scanned list per subject
         subjectList.loadSubjects();
+        loadScanHistory();
+        subjectList.setScanHistory(scanHistoryObj);
     }
 
     public void saveReloadData()
@@ -423,43 +381,16 @@ public class SentimentAnalysisManager {
         }
 
     }
-    // Maybe put this function to a history manager.
+
+
     private void saveScanHistory(ScanHistory scanHistory)
     {
-        File scanHistoryFile = new File(context.getFilesDir(),"scan_history.txt");
-        try
-        {
-            ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(scanHistoryFile));
-
-            output.writeObject(scanHistory);
-
-            output.close();
-
-        }
-        catch(Exception e)
-        {
-            Log.e("Save Scan History" , "Failed to save scan history:" + e.toString() );
-        }
+        Utilities.saveObject(scanHistory,context,"scan_history.txt");
     }
 
     private void loadScanHistory()
     {
-        // Bad coding... not reusing.
-        // TODO: Rework this code to be reused.
-        File scanHistoryFile = new File(context.getFilesDir(),"scan_history.txt");
-
-        try
-        {
-            ObjectInputStream input = new ObjectInputStream(new FileInputStream(scanHistoryFile));
-            scanHistoryObj = (ScanHistory) input.readObject();
-
-            input.close();
-        }
-        catch(Exception e)
-        {
-            Log.e("Load Scan History" , "Failed to load scan history " + e.toString());
-        }
-
+        scanHistoryObj = (ScanHistory) Utilities.loadObject(context,"scan_history.txt");
     }
 
     private ArrayList<String> GetLexicon()

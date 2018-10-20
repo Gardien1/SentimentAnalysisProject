@@ -14,18 +14,24 @@ public class ScanHistory implements Serializable{
 
     String lastScanTime;
     HashMap<Date,Integer> scanHistory;
+    ArrayList<Integer> daysScanned;
+    ArrayList<Integer> scores;
 
 
     public ScanHistory()
     {
         lastScanTime = "";
         scanHistory = new HashMap<Date,Integer>();
+        daysScanned = new ArrayList<Integer>();
+        scores = new ArrayList<Integer>();
     }
 
     public ScanHistory(String scanTime)
     {
         lastScanTime = scanTime;
         scanHistory = new HashMap<Date,Integer>();
+        daysScanned = new ArrayList<Integer>();
+        scores = new ArrayList<Integer>();
     }
 
     public void setLastScanTime(String scanTime)
@@ -44,31 +50,57 @@ public class ScanHistory implements Serializable{
     }
 
     //
-    public void addToHistory(Date scanTime , Integer score)
+    public void addToHistory(Integer scanDay , Integer score)
     {
         boolean foundInHistory = false;
 
-        for(Date key : scanHistory.keySet())
+        // Check for new month
+        if(daysScanned.size() > 0)
         {
-            if(key.getMonth() == scanTime.getMonth() && key.getDay() == scanTime.getDay())
+            if(scanDay < daysScanned.get(0))
             {
-                Integer updateScore = scanHistory.get(key) + score;
-                scanHistory.put(key , updateScore);
-                foundInHistory = true;
-                Log.i("ADD TO HISTORY" , "FOUND IN HISTORY: UPDATING!");
-                break;
+                Log.i("ADD TO HISTORY", "NEW MONTH: RESETTING DATA");
+                resetData();
+            }
+
+            for(int i=0;i<daysScanned.size();i++)
+            {
+                if(scanDay == daysScanned.get(i))
+                {
+                    Log.i("SCAN HITORY" , "EXISITNG DAY: UPDATING");
+                    scores.set(i , scores.get(i) + score);
+                    foundInHistory = true;
+                    break;
+                }
             }
         }
 
         if(!foundInHistory)
         {
-            scanHistory.put(scanTime,score);
-            Log.i("ADD TO HISTORY" , "NOT FOUND IN HISTORY ADDING NEW");
+            Log.i("SCAN HISTORY" , "NEW DAY: ADDING");
+            daysScanned.add(scanDay);
+            scores.add(score);
         }
     }
 
     public HashMap<Date, Integer> getScanHistory() {
         return scanHistory;
+    }
+
+    public ArrayList<Integer> getScanDays()
+    {
+        return daysScanned;
+    }
+
+    public ArrayList<Integer> getScores()
+    {
+        return scores;
+    }
+
+    public void resetData()
+    {
+        scores = new ArrayList<Integer>();
+        daysScanned = new ArrayList<Integer>();
     }
 
 }

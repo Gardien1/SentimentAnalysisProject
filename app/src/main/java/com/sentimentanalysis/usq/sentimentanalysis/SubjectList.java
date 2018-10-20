@@ -68,16 +68,19 @@ public class SubjectList {
 
             ObjectInputStream input =
                     new ObjectInputStream(new FileInputStream(currentSubjects));
+            Log.i("File Length: ", currentSubjects.getAbsolutePath());
 
-            boolean isDone = false;
+            boolean isDone = !(currentSubjects.exists());
             while (!isDone) {
                 try {
-                    // Todo: Check for end of file before loading
-                    Subject subject = (Subject) input.readObject();
-                    if (subject != null)
+                    Object object = input.readObject();
+
+                    Log.i("LOADING TEST", object.toString());
+                    if ( !object.equals( " " ) )
                     {
-                        Log.i("LOAD SUBJECTS" , "Scanned tweet size: " + subject.getScannedTweets().size());
+                        Subject subject = (Subject) object;
                         subjects.add(subject);
+
                     }
                     else
                     {
@@ -109,6 +112,7 @@ public class SubjectList {
         File subjectBackup = new File( applicationContext.getFilesDir(),"subjects.bak" );
 
         try {
+            Log.i("SAVING TEST", "CREATING FILE");
             newSubjects.createNewFile();
 
             ObjectOutputStream output =
@@ -116,7 +120,9 @@ public class SubjectList {
 
             for ( Subject subject : subjects ) {
                 output.writeObject( subject );
+                Log.i("WRITING TEST", "Writing" + subject.toString());
             }
+            output.writeObject( " " );
 
             subjectBackup.delete();
             currentSubjects.renameTo( subjectBackup );
@@ -137,6 +143,7 @@ public class SubjectList {
             Log.i("ANALYSE CALL" , subjects.get(i).getTwitterHandle());
             subjects.get(i).analyseTweets( LEXICON, TWITTER_API, scanHistory, applicationContext, notificationManager );
             Log.i("ANALYSE CALL" , subjects.get(i).getTwitterHandle() + " saving tweets");
+
         }
 
         saveSubjects();
@@ -164,5 +171,9 @@ public class SubjectList {
 
     public ScanHistory getScanHistory() {
         return scanHistory;
+    }
+
+    public void setScanHistory(ScanHistory input){
+        scanHistory = input;
     }
 }

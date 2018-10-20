@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Build;
+import android.provider.CalendarContract;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -38,6 +39,8 @@ public class Subject implements Serializable{
 	private ScanTime lastScanned = new ScanTime();
 	private int scoreCounter = 0;
 
+	// DEBUG ONLY TO SIMULATE GRAPH
+	private int dailyOffset = 0;
 	
 	/**
 	 * @param handle	twitter handle, after the {@literal @} symbol
@@ -77,7 +80,7 @@ public class Subject implements Serializable{
 	 * the daily trend counter.
 	 */
 	public void testDailyTrend( Context context, NotificationManager notificationManager ) {
-		if( dailyScore.size() > 1 && dailyScore.get(scoreCounter - 1) < dailyScore.get(scoreCounter - 2) ) {
+		if( dailyScore.size() > 2 && dailyScore.get(scoreCounter - 1) < dailyScore.get(scoreCounter - 2) ) {
 			dailyTrend++;
 			if(dailyTrend >= 3) {
 				notifyOfNegativeTrend( context, notificationManager );
@@ -90,7 +93,7 @@ public class Subject implements Serializable{
 		    isNegative = false;
 	}
 	
-	public void analyseTweets( Lexicon lexicon, TwitterApi twitterApi, ScanHistory history, Context context, NotificationManager notificationManager ) {
+	public void analyseTweets( Lexicon lexicon, TwitterApi twitterApi, ScanHistory history, Context context, NotificationManager notificationManager) {
         HashMap<String,String> tweetList = twitterApi.GetTweetsSingleUser( this );
         //Integer score = dailyScore.get(0);
 		Integer score = 0;
@@ -106,6 +109,7 @@ public class Subject implements Serializable{
 
         // Check if it is a new day
 		Calendar currentTime = Calendar.getInstance();
+		currentTime.add(Calendar.DAY_OF_MONTH , dailyOffset);
 
 		// TODO: Change after showing Daniel
 		if(currentTime.get(Calendar.DAY_OF_MONTH) > lastScanned.getScanTimeInstance().get(Calendar.DAY_OF_MONTH) &&
@@ -137,9 +141,10 @@ public class Subject implements Serializable{
 			Log.i("ANALYSE TWEETS" , "SAME DAY SAME SCORE");
 		}
 
-		history.addToHistory((Date)currentTime.getTime(),score);
+		history.addToHistory(currentTime.get(Calendar.DAY_OF_MONTH),score);
 
-
+		// DEBUG WILL BE DELETED IN PRODUCTION.
+		dailyOffset++;
     }
 
     public void addScannedTweet(String tweetId)
@@ -149,8 +154,8 @@ public class Subject implements Serializable{
 
     @Override
     public String toString() {
-		return "Twitter Handle:" + twitterHandle + "\nDaily Scores:"
-				+ dailyScore.toString();
+		return new StringBuffer("Twitter Handle: ").append(twitterHandle).append("\nDaily Scores: ")
+                .append(dailyScore).append("Score Counter: ").append(scoreCounter).toString();
 	}
 
     public Boolean isValid() { return twitterHandle != ""; }

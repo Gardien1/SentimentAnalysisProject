@@ -9,13 +9,15 @@
 
     <com.jjoe64.graphview.GraphView
         android:id="@+id/statsGraph"
-        android:layout_width="335dp"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="63dp"
-        android:layout_marginTop="104dp"
-        app:layout_constraintBottom_toTopOf="@+id/content_back"
+        android:layout_marginBottom="14dp"
+        android:layout_marginEnd="48dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="119dp"
+        app:layout_constraintBottom_toTopOf="@+id/dates_title"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.51"
+        app:layout_constraintStart_toEndOf="@+id/score_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -23,23 +25,21 @@
         android:id="@+id/stats_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="28dp"
-        android:layout_marginTop="57dp"
+        android:layout_marginBottom="17dp"
+        android:layout_marginTop="37dp"
         android:text="Your family overview:"
         android:textColor="@color/colorPrimary"
         android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/statsGraph"
+        app:layout_constraintBottom_toTopOf="@+id/graph_month"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.501"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/content_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="53dp"
+        android:layout_marginBottom="58dp"
         android:background="@android:color/holo_blue_light"
         android:text="Back"
         android:textColor="@color/colorPrimary"
@@ -47,5 +47,40 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/statsGraph" />
+
+    <TextView
+        android:id="@+id/graph_month"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="19dp"
+        android:text="This Month"
+        android:textColor="@android:color/background_light"
+        app:layout_constraintBottom_toTopOf="@+id/statsGraph"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stats_title" />
+
+    <TextView
+        android:id="@+id/dates_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="141dp"
+        android:text="Date"
+        android:textColor="@android:color/background_light"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/statsGraph"
+        app:layout_constraintTop_toBottomOf="@+id/statsGraph" />
+
+    <TextView
+        android:id="@+id/score_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="1dp"
+        android:layout_marginEnd="11dp"
+        android:text="Score"
+        android:textColor="@android:color/background_light"
+        app:layout_constraintBottom_toBottomOf="@+id/statsGraph"
+        app:layout_constraintEnd_toStartOf="@+id/statsGraph"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

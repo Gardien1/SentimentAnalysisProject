@@ -5,10 +5,12 @@ import android.util.Log;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
+import com.jjoe64.graphview.helper.StaticLabelsFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -36,39 +38,34 @@ public class GraphManager {
     }
 
 
-    public void updateGraph(HashMap<Date,Integer> data, AppCompatActivity context)
+    public void updateGraph(ArrayList<Integer> x_axis, ArrayList<Integer> y_axis, AppCompatActivity context)
     {
-
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>();
-        Date minDate = new Date();
-        Date maxDate = new Date();
-        int sizeCount = 0;
-        Log.i("GraphManager" , "Update graph called: " + data.size());
-        for(Date key : data.keySet())
+        try
         {
-            Log.i("Graph Manager","ADDED TO SCAN HISTORY: " + data.get(key).toString());
-            if(sizeCount == data.keySet().size())
+            LineGraphSeries series = new LineGraphSeries();
+
+            Log.i("X_AXIS",x_axis.toString());
+            Log.i("Y_AXIS",y_axis.toString());
+
+            for(int i = 0; i<x_axis.size();i++)
             {
-                maxDate = key;
-            }
-            else if(sizeCount == 0)
-            {
-                minDate = key;
+                series.appendData(new DataPoint(x_axis.get(i),y_axis.get(i)),true,100);
             }
 
-            series.appendData(new DataPoint(key,data.get(key)),true,10);
-            sizeCount++;
+            graph.addSeries(series);
+
+            graph.getGridLabelRenderer().setNumHorizontalLabels(x_axis.size());
+
+            //graph.getViewport().setMinX(d1.getTime());
+            //graph.getViewport().setMaxX(d2.getTime());
+            graph.getViewport().setXAxisBoundsManual(true);
+            graph.getGridLabelRenderer().setHumanRounding(false);
+        }
+        catch(Exception e)
+        {
+            Log.e("GRAPH ERROR", e.toString());
         }
 
-        graph.addSeries(series);
-
-        graph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(context));
-        graph.getGridLabelRenderer().setNumHorizontalLabels(data.size());
-
-        graph.getViewport().setMinX(minDate.getTime());
-        graph.getViewport().setMaxX(maxDate.getTime());
-        graph.getViewport().setXAxisBoundsManual(true);
-        graph.getGridLabelRenderer().setHumanRounding(false);
     }
 
 }
