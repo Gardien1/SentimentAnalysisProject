@@ -364,7 +364,7 @@ public class SentimentAnalysisManager {
 
 
 
-                        Thread.sleep(6000);
+                        Thread.sleep(60000);
                     }
                 }
                 catch(Exception e)

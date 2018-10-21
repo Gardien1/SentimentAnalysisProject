@@ -33,11 +33,11 @@ public class Subject implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private String twitterHandle;
 	private ArrayList<Integer> dailyScore = new ArrayList<Integer>(30);
-	private int dailyTrend = 0;
+	private Integer dailyTrend = 0;
 	private Boolean isNegative = false;
 	private ArrayList<String> scannedTweets = new ArrayList<String>();
 	private ScanTime lastScanned = new ScanTime();
-	private int scoreCounter = 0;
+	private Integer scoreCounter = 0;
 
 	// DEBUG ONLY TO SIMULATE GRAPH
 	private int dailyOffset = 0;
@@ -48,6 +48,16 @@ public class Subject implements Serializable{
 	public Subject( String handle ) {
 		twitterHandle = handle;
 	}
+
+	public Subject( String handle, String scores, String counter) {
+        twitterHandle = handle;
+        scoreCounter = Integer.parseInt(counter);
+
+        String[] splitScores = scores.replace("[", "")
+                .replace("]", "").split(", ");
+
+        for(String score : splitScores) { dailyScore.add(Integer.parseInt(score)); }
+    }
 
 	public String getTwitterHandle() { return twitterHandle; };
 	public ArrayList<Integer> getDailyScore()  { return dailyScore; };
@@ -62,7 +72,7 @@ public class Subject implements Serializable{
 				new NotificationCompat.Builder(context, "NT")
                         .setSmallIcon(R.drawable.social_alert_icon)
 						.setContentTitle("Sentiment Analysis")
-						.setContentText(twitterHandle + "has had a trend of more negative days.")
+						.setContentText(twitterHandle + " has had a trend of more negative days.")
 						.setPriority(NotificationCompat.PRIORITY_DEFAULT)
 						.setAutoCancel(true);
 
@@ -154,8 +164,7 @@ public class Subject implements Serializable{
 
     @Override
     public String toString() {
-		return new StringBuffer("Twitter Handle: ").append(twitterHandle).append("\nDaily Scores: ")
-                .append(dailyScore).append("Score Counter: ").append(scoreCounter).toString();
+		return (twitterHandle + ":" + dailyScore + ":" + scoreCounter + "\n");
 	}
 
     public Boolean isValid() { return twitterHandle != ""; }

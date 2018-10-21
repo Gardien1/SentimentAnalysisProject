@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Scanner;
 
 /**
  * A wrapper class for a list of subjects, and a lexicon used to analyse tweets.  Creates
@@ -66,30 +67,23 @@ public class SubjectList {
 
             File currentSubjects = new File( applicationContext.getFilesDir(),"subjects.txt" );
 
-            ObjectInputStream input =
-                    new ObjectInputStream(new FileInputStream(currentSubjects));
-            Log.i("File Length: ", currentSubjects.getAbsolutePath());
+            Scanner input = new Scanner(currentSubjects);
+            Log.i("File Length: ", Long.toString(currentSubjects.length()));
 
-            boolean isDone = !(currentSubjects.exists());
+
+            boolean isDone = false;
             while (!isDone) {
                 try {
-                    Object object = input.readObject();
+                    String line = input.nextLine();
+                    Log.i("LOADING TEST", line);
 
-                    Log.i("LOADING TEST", object.toString());
-                    if ( !object.equals( " " ) )
-                    {
-                        Subject subject = (Subject) object;
+                    if (!line.equals("\\")) {
+                        String[] splitArray = line.split(":");
+                        Subject subject = new Subject(splitArray[0],splitArray[1], splitArray[2]);
                         subjects.add(subject);
-
-                    }
-                    else
-                    {
+                    } else {
                         isDone = true;
                     }
-
-                } catch (ClassNotFoundException exception) {
-                    isDone = true;
-                    exception.printStackTrace();
                 }
                 catch(Exception e)
                 {
@@ -115,14 +109,13 @@ public class SubjectList {
             Log.i("SAVING TEST", "CREATING FILE");
             newSubjects.createNewFile();
 
-            ObjectOutputStream output =
-                new ObjectOutputStream(new FileOutputStream( newSubjects ));
+            FileWriter output = new FileWriter( newSubjects );
 
             for ( Subject subject : subjects ) {
-                output.writeObject( subject );
+                output.write( subject.toString() );
                 Log.i("WRITING TEST", "Writing" + subject.toString());
             }
-            output.writeObject( " " );
+            output.write( "\\" );
 
             subjectBackup.delete();
             currentSubjects.renameTo( subjectBackup );
